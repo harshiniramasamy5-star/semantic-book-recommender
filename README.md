@@ -45,3 +45,18 @@ Then open http://localhost:7860 in your browser.
 - Wrap the recommender in a REST API (FastAPI) for reuse beyond the UI.
 - Add evaluation metrics (precision@k) to measure recommendation quality.
 - Deploy publicly (Hugging Face Spaces) and containerize with Docker.
+
+## Evaluation
+
+The recommender is evaluated offline using a hand-labeled query set
+(`evaluate.py`) with standard information-retrieval metrics:
+
+- **Precision@K** — fraction of the top-K recommendations that are relevant
+- **Recall@K** — fraction of all relevant books found in the top-K
+
+Run with: `python evaluate.py`
+
+*Note: the relevance labels are author-assigned on a small query set, so
+results are a coarse, internally-consistent benchmark rather than a
+production-grade evaluation. A larger independently-labeled set would
+give stronger numbers.*

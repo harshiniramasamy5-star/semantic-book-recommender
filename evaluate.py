@@ -1,22 +1,37 @@
 """
 evaluate.py - Precision@K and Recall@K for the book recommender.
+Wired to the real recommender in GRADIO.py.
 Run:  python evaluate.py
 """
 
-# ---- STEP 1: your test set (edit these with real titles from your dataset) ----
+from GRADIO import retrieve_semantic_recommendations
+
+# ---- STEP 1: your test set ----
 TEST_SET = [
     {
         "query": "a redemption story set against war",
-        "relevant_titles": ["The Kite Runner", "All the Light We Cannot See", "Atonement"],
+        "relevant_titles": [
+            "Catch-22",
+            "If I Die in a Combat Zone",
+            "The Women's War",
+        ],
     },
     {
-        "query": "a cozy magical story about friendship",
-        "relevant_titles": ["Harry Potter and the Sorcerer's Stone", "The House in the Cerulean Sea"],
+        "query": "a magical adventure for young readers",
+        "relevant_titles": [
+            "The Lion, the Witch and the Wardrobe (picture book edition)",
+            "The Alchemist",
+            "Anansi Boys",
+        ],
     },
     {
-        "query": "a dark psychological thriller with a twist",
-        "relevant_titles": ["Gone Girl", "The Silent Patient", "Sharp Objects"],
+        "query": "a story about identity and self discovery",
+        "relevant_titles": [
+            "Identity",
+            "The Alchemist",
+        ],
     },
+
 ]
 
 # ---- STEP 2: the metrics ----
@@ -32,21 +47,12 @@ def recall_at_k(recommended, relevant, k):
     hits = sum(1 for t in top_k if t in relevant_set)
     return hits / len(relevant_set) if relevant_set else 0.0
 
-# ---- STEP 3: connect to YOUR recommender (replace the placeholder body) ----
+# ---- STEP 3: call YOUR real recommender ----
 def get_recommendations(query, k=10):
-    # REPLACE THIS with a call to your real function, e.g.:
-    #   from main import retrieve_semantic_recommendations
-    #   df = retrieve_semantic_recommendations(query, top_k=k)
-    #   return df["title"].tolist()
-    fake = {
-        "a redemption story set against war":
-            ["The Kite Runner", "War and Peace", "Atonement", "Dune", "1984"],
-        "a cozy magical story about friendship":
-            ["The House in the Cerulean Sea", "Dune", "Harry Potter and the Sorcerer's Stone"],
-        "a dark psychological thriller with a twist":
-            ["Gone Girl", "The Silent Patient", "Pride and Prejudice"],
-    }
-    return fake.get(query, [])[:k]
+    # Pass category="All" and tone="All" so the filter inside the function
+    # does not accidentally drop everything.
+    df = retrieve_semantic_recommendations(query, category="All", tone="All", final_top_k=k)
+    return df["title"].tolist()
 
 # ---- STEP 4: run it ----
 def run_evaluation(k=5):
