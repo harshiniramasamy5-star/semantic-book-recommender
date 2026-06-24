@@ -7,6 +7,5 @@ __pycache__/
 .env
 dotenv.env
 .DS_Store
-*.csv
-*.txt
 .ipynb_checkpoints/
+.cache/
