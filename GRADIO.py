@@ -179,8 +179,7 @@ footer { display:none !important; }
 """
 
 
-with gr.Blocks(theme=gr.themes.Soft(primary_hue="orange", secondary_hue="amber"),
-               css=custom_css, title="Semantic Book Recommender") as dashboard:
+with gr.Blocks(title="Semantic Book Recommender") as dashboard:
 
     with gr.Column(elem_id="hero"):
         gr.HTML("<h1>📖 Semantic Book <span class='accent'>Recommender</span></h1>")
@@ -224,4 +223,4 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="orange", secondary_hue="amber")
 
 
 if __name__ == "__main__":
-    dashboard.launch()
+    dashboard.launch(theme=gr.themes.Soft(primary_hue="orange", secondary_hue="amber"), css=custom_css)
