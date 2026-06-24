@@ -1,3 +1,17 @@
+---
+title: Semantic Book Recommender
+emoji: 📚
+colorFrom: pink
+colorTo: yellow
+sdk: gradio
+sdk_version: 6.19.0
+python_version: '3.13'
+app_file: GRADIO.py
+pinned: false
+license: mit
+short_description: Semantic book recommender using sentence-transformer embeddings
+---
+
 # 📖 Semantic Book Recommender
 
 A semantic book recommendation engine that finds books by **meaning**, not keyword matching. Describe the kind of story you want — *"a redemption story set against war"* — and it returns the most relevant books, filterable by category and emotional tone.
