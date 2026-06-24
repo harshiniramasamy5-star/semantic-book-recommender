@@ -1,0 +1,16 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.git/
+.idea/
+.junie/
+.cache/
+.env
+dotenv.env
+pyvenv.cfg
+CACHEDIR.TAG
+share/
+.ipynb_checkpoints/
+books_cleaned.csv
+books_with_categories.csv
