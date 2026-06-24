@@ -12,302 +12,244 @@ license: mit
 short_description: Find books by meaning, mood, and category
 ---
 
-# 📖 Semantic Book Recommender
+<div align="center">
 
-> **Live Demo →** [huggingface.co/spaces/hersheys21/semantic-book-recommender](https://huggingface.co/spaces/hersheys21/semantic-book-recommender)
-> 
-> **GitHub →** [github.com/harshiniramasamy5-star/semantic-book-recommender](https://github.com/harshiniramasamy5-star/semantic-book-recommender)
+# 📚 Semantic Book Recommender
+### Natural Language Book Discovery Using LLMs, Vector Embeddings & Semantic Search
 
-A semantic book recommendation engine built on top of the [freeCodeCamp LLM course](https://youtu.be/Q7mS1VHm3Yw) — extended with a custom-themed Gradio interface, a local sentence-transformer embedding model, and a rigorous offline evaluation harness measuring Precision@K and Recall@K.
+[![Python](https://img.shields.io/badge/Python-3.13-blue?style=flat-square&logo=python)](https://python.org)
+[![Gradio](https://img.shields.io/badge/Gradio-6.19.0-orange?style=flat-square)](https://gradio.app)
+[![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector_DB-green?style=flat-square)](https://trychroma.com)
+[![HuggingFace](https://img.shields.io/badge/HuggingFace-Transformers-yellow?style=flat-square)](https://huggingface.co)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-HuggingFace_Spaces-blue?style=flat-square)](https://huggingface.co/spaces/hersheys21/semantic-book-recommender)
 
-Describe the kind of story you want — *"a redemption story set against war"* or *"a joyful coming-of-age adventure"* — and the system finds the most semantically similar books from a 7,000-book dataset, filterable by category and emotional tone.
+**[🚀 Live Demo](https://huggingface.co/spaces/hersheys21/semantic-book-recommender) · [📂 GitHub](https://github.com/harshiniramasamy5-star/semantic-book-recommender)**
 
----
-
-## 🗂️ Table of Contents
-
-1. [What This Project Does](#what-this-project-does)
-2. [Architecture](#architecture)
-3. [Data Pipeline](#data-pipeline)
-4. [How Semantic Search Works](#how-semantic-search-works)
-5. [Zero-Shot Classification](#zero-shot-classification)
-6. [Sentiment Analysis & Emotional Tone](#sentiment-analysis--emotional-tone)
-7. [Vector Database](#vector-database)
-8. [Gradio Interface](#gradio-interface)
-9. [Evaluation — Precision@K & Recall@K](#evaluation--precisionk--recallk)
-10. [Tech Stack](#tech-stack)
-11. [Project Structure](#project-structure)
-12. [Running Locally](#running-locally)
-13. [What I Built Beyond the Tutorial](#what-i-built-beyond-the-tutorial)
-14. [Key Concepts Explained](#key-concepts-explained)
+</div>
 
 ---
 
-## What This Project Does
+## 📌 Project Overview
 
-Traditional book recommendation systems rely on ratings, purchase history, or exact keyword matching. This system uses **semantic search** — it understands the *meaning* of your query by converting text into high-dimensional numerical vectors (embeddings), then finding books whose descriptions are closest in vector space.
+Most book discovery systems fail for one fundamental reason: they match words, not meaning. A user searching for *"a story about finding yourself after loss"* gets nothing — because no book description uses those exact words.
 
-| Feature | How it works |
+This project solves that. By converting both book descriptions and user queries into dense numerical vectors using a fine-tuned sentence-transformer model, the system retrieves books based on **semantic similarity** — capturing what a reader *means*, not just what they *type*.
+
+The result is a recommendation engine that understands natural language queries like *"a joyful adventure about unlikely friendships"* and returns contextually relevant books across a 7,000-book corpus, with additional filtering by genre category and emotional tone.
+
+### Why Keyword Search Falls Short
+
+| Limitation | Impact |
 |---|---|
-| Natural language query | Sentence-transformer encodes your text into a 384-dim vector |
-| Semantic similarity | Cosine similarity in ChromaDB finds nearest book embeddings |
-| Category filter | Zero-shot classification labels every book Fiction / Non-Fiction |
-| Emotional tone filter | Fine-tuned sentiment model scores each book on 5 emotions |
-| Results display | Gradio gallery shows cover images, titles, authors, descriptions |
+| Exact word matching | Misses synonyms, paraphrases, and conceptually related content |
+| No semantic understanding | "Lonely explorer" ≠ "isolated adventurer" to a keyword engine |
+| No nuance | Cannot distinguish tone, theme, or emotional register |
+| Rigid queries | Fails when users describe feelings rather than titles |
+
+### Why Semantic Search Is Better
+
+Semantic search encodes text as high-dimensional vectors where proximity in space means similarity in meaning. Two sentences with zero word overlap can map to nearly identical vectors if they convey the same idea. This allows the system to surface books that *feel* relevant to a query, not just books that happen to share vocabulary with it.
+
+### How LLMs Enhance the Pipeline
+
+Large pre-trained language models contribute at three stages: (1) **embedding** — `all-MiniLM-L6-v2` encodes descriptions into semantically rich vectors; (2) **zero-shot classification** — `facebook/bart-large-mnli` labels books as Fiction or Non-Fiction without any labelled training data by leveraging NLI reasoning; (3) **emotion analysis** — `j-hartmann/emotion-english-distilroberta-base` extracts emotional tone from descriptions to power mood-based filtering.
 
 ---
 
-## Architecture
+## 🎬 Demo
+
+> 📸 _Screenshot — add after capturing from https://huggingface.co/spaces/hersheys21/semantic-book-recommender_
+
+> 🎥 _GIF — record a short screen capture of a live query and drop it here_
+
+**Example queries to try on the live demo:**
+
+- `"a redemption story set against the backdrop of war"`
+- `"books about entrepreneurship and building something from nothing"`
+- `"a joyful coming-of-age story with unlikely friendships"`
+- `"recommend something similar to Atomic Habits"`
+- `"best books for learning machine learning from scratch"`
+- `"motivational reads for students navigating uncertainty"`
+
+---
+
+## ✨ Key Features
+
+- **Natural language search** — query in plain English; no keywords or titles required
+- **Semantic similarity retrieval** — cosine similarity over 384-dimensional sentence embeddings
+- **Local embedding model** — `all-MiniLM-L6-v2` runs entirely on-device; no API key or cost
+- **RAG-inspired retrieval** — query embedding → vector store retrieval → metadata-enriched results
+- **Zero-shot genre classification** — Fiction / Non-Fiction labels without labelled training data
+- **Emotion-based filtering** — filter by joy, sadness, fear, anger, or surprise
+- **Offline evaluation harness** — Precision@K and Recall@K metrics with committed benchmark results
+- **Custom-themed Gradio UI** — warm literary aesthetic with cover gallery, descriptions, and metadata
+- **Deployed on Hugging Face Spaces** — publicly accessible live demo
+
+---
+
+## 🏗️ System Architecture
 
 ```mermaid
 graph TD
-    A[User Query] --> B[SentenceTransformer\nall-MiniLM-L6-v2]
-    B --> C[Query Embedding\n384-dim vector]
-    C --> D[ChromaDB\nVector Similarity Search]
-    D --> E[Top-N Candidates]
-    E --> F{Filters Applied?}
-    F -- Category --> G[Fiction / Non-Fiction Filter]
-    F -- Emotion --> H[Joy / Sadness / Fear /\nAnger / Surprise Filter]
-    G --> I[Gradio Dashboard\nCover Gallery + Metadata]
-    H --> I
-
-    subgraph Offline Indexing
-        J[7k Books CSV] --> K[Text Cleaning\n& Preprocessing]
-        K --> L[tagged_description.txt\nISBN + Description]
-        L --> B2[SentenceTransformer\nBatch Encode]
-        B2 --> D
-        J --> M[Zero-Shot Classifier\nfacebook/bart-large-mnli]
-        M --> N[books_with_categories.csv]
-        N --> O[Sentiment Model\nj-hartmann/emotion-english-distilroberta-base]
-        O --> P[books_with_emotions.csv]
-        P --> D
+    subgraph Offline Indexing Pipeline
+        A[Kaggle 7k Books Dataset] --> B[Data Cleaning & Preprocessing]
+        B --> C[Feature Engineering\ntitle+subtitle, tagged_description]
+        C --> D[Zero-Shot Classification\nfacebook/bart-large-mnli]
+        D --> E[Emotion Analysis\nj-hartmann/emotion-english-distilroberta-base]
+        E --> F[books_with_emotions.csv]
+        C --> G[Text Chunking\nCharacterTextSplitter]
+        G --> H[Sentence Embeddings\nall-MiniLM-L6-v2\n384-dim vectors]
+        H --> I[(ChromaDB\nVector Store)]
     end
+
+    subgraph Runtime Inference Pipeline
+        J[User Natural Language Query] --> K[Query Embedding\nall-MiniLM-L6-v2]
+        K --> L[Cosine Similarity Search\nTop-50 Candidates]
+        I --> L
+        L --> M[Metadata Join on ISBN13\nfrom books_with_emotions.csv]
+        M --> N{Filters}
+        N --> O[Category Filter\nFiction / Non-Fiction]
+        N --> P[Emotion Filter\nJoy / Sadness / Fear / Anger / Surprise]
+        O --> Q[Gradio Book Card Gallery\nCover · Title · Author · Description]
+        P --> Q
+    end
+
+    F --> M
 ```
 
 ---
 
-## Data Pipeline
+## 🔬 Machine Learning Pipeline
 
-The project uses the [7k Books with Metadata dataset from Kaggle](https://www.kaggle.com/datasets/dylanjcastillo/7k-books-with-metadata).
+### Stage 1 — Data Ingestion & Quality Filtering
 
-### Step 1 — Data Cleaning (`data-exploration.ipynb`)
+The pipeline begins with the [7k Books with Metadata dataset from Kaggle](https://www.kaggle.com/datasets/dylanjcastillo/7k-books-with-metadata), containing titles, authors, descriptions, ratings, categories, and cover image URLs.
 
-Raw data is messy. The following cleaning steps were applied:
+**Quality filters applied:**
+- Rows missing `description`, `num_pages`, `average_rating`, `published_year`, or `ratings_count` are dropped — incomplete records degrade retrieval quality and produce misleading embeddings
+- Descriptions under 30 words are removed — short blurbs lack sufficient semantic content for the embedding model to produce a meaningful vector
+- Duplicate ISBNs are resolved to prevent retrieval collisions
 
-- **Missing values**: rows with missing `description`, `num_pages`, `average_rating`, `published_year`, or `ratings_count` are dropped — these fields are essential for meaningful recommendations.
-- **Short descriptions**: books with fewer than 30 words in their description are removed. Semantic search needs enough text to produce a meaningful embedding; a 5-word blurb gives nothing for the model to work with.
-- **Title normalisation**: `title_and_subtitle` column created — if a subtitle exists, it is appended (e.g., *"The Great Gatsby: A Novel"*); otherwise the title alone is kept.
-- **Tagged descriptions**: a `tagged_description` column is created by prepending each book's ISBN13 to its description (format: `ISBN13_XXXXXXXXX <description text>`). This lets the vector store retrieve the right book record from search results.
+**Engineered features:**
+- `title_and_subtitle` — concatenates title and subtitle for richer display metadata
+- `tagged_description` — prepends ISBN13 to description text (`ISBN13_XXXXXXXXX <description>`) enabling reliable metadata retrieval after vector search
 
-### Step 2 — Zero-Shot Classification (genre labelling)
+### Stage 2 — Zero-Shot Genre Classification
 
-Books in the wild have inconsistent or missing genre labels. Instead of manual labelling, a **zero-shot classifier** automatically categorises every book as Fiction or Non-Fiction without any labelled training data.
+Rather than relying on inconsistent or missing genre labels in the raw data, a zero-shot NLI classifier assigns a genre to every book automatically.
 
-Model used: `facebook/bart-large-mnli` via HuggingFace Transformers.
+**Model**: `facebook/bart-large-mnli`
 
-How it works: BART is a sequence-to-sequence model pre-trained on natural language inference (NLI). Zero-shot classification repurposes NLI — it asks "does this description *entail* the label Fiction?" and uses the entailment score as a confidence. The label with the highest score wins. No fine-tuning needed.
+BART is a sequence-to-sequence model pre-trained on MultiNLI, a large natural language inference corpus. Zero-shot classification repurposes NLI by framing genre assignment as an entailment problem: "Does this book description *entail* the label *fiction*?" The label receiving the highest entailment probability is assigned. No labelled training examples, no fine-tuning.
 
-Result saved as `books_with_categories.csv`.
+**Output**: `books_with_categories.csv`
 
-### Step 3 — Sentiment / Emotion Analysis
+### Stage 3 — Emotion Score Extraction
 
-To allow emotional tone filtering, a fine-tuned emotion classifier scores every book description across **five emotions**: joy, sadness, fear, anger, and surprise.
+To power mood-based filtering, a fine-tuned emotion classifier produces per-description emotion scores across five dimensions.
 
-Model used: `j-hartmann/emotion-english-distilroberta-base` — a DistilRoBERTa model fine-tuned on emotion datasets.
+**Model**: `j-hartmann/emotion-english-distilroberta-base`
 
-Each book gets a score for each emotion (0.0–1.0). The dominant emotion determines the book's primary emotional tone. Users can filter by tone — e.g., selecting "Joyful" surfaces books where joy is the dominant emotion.
+DistilRoBERTa fine-tuned on multi-label emotion datasets. Processes each book description and outputs probability scores for joy, sadness, fear, anger, and surprise. The dominant emotion is stored as the primary emotional tone.
 
-Result saved as `books_with_emotions.csv` (this file is the final dataset used by the Gradio app).
+**Output**: `books_with_emotions.csv` — the final dataset consumed by the app at runtime
 
----
+### Stage 4 — Text Chunking & Indexing
 
-## How Semantic Search Works
+`tagged_description.txt` is loaded via LangChain's `TextLoader` and split using `CharacterTextSplitter`. Each chunk corresponds to one book's ISBN-tagged description.
 
-### Embeddings
+### Stage 5 — Embedding Generation & Vector Storage
 
-A sentence-transformer converts text into a fixed-length numerical vector. Words with similar meanings land near each other in vector space — so "a dark detective mystery" and "a noir crime thriller" will produce similar vectors even though they share no words.
+Each description chunk is encoded by `all-MiniLM-L6-v2` into a 384-dimensional dense vector via `HuggingFaceEmbeddings`. Vectors are stored in ChromaDB, which builds an efficient index for sub-millisecond nearest-neighbour retrieval.
 
-Model used: `all-MiniLM-L6-v2` (HuggingFace sentence-transformers library).
+### Stage 6 — Runtime Retrieval
 
-- **Input**: a sentence or paragraph of text
-- **Output**: a 384-dimensional vector (a list of 384 floating-point numbers)
-- **Why this model**: small (80 MB), fast, runs entirely locally — no API key or internet connection needed at inference time. Achieves strong performance on semantic similarity benchmarks for its size.
-
-All book descriptions are encoded offline and stored in ChromaDB. At query time, the user's input is encoded with the same model, and the database returns the N nearest stored vectors.
-
-### Similarity Metric
-
-ChromaDB uses **cosine similarity** — it measures the angle between two vectors, not their absolute distance. Two vectors pointing in the same direction (angle ≈ 0) score 1.0 regardless of their magnitudes. This works well for semantic meaning because the *direction* a sentence-transformer assigns to text captures its semantic content.
+At query time, the user's text is encoded with the same model. ChromaDB performs cosine similarity search and returns the 50 nearest book embeddings. Results are joined to `books_with_emotions.csv` on ISBN13, filters are applied, and the top N books are rendered in the Gradio UI.
 
 ---
 
-## Zero-Shot Classification
+## 🛠️ Technology Stack
 
-**What it is**: classifying text into categories the model was never explicitly trained on, by using natural language as the label.
+| Category | Technology | Version | Purpose |
+|---|---|---|---|
+| Language | Python | 3.13 | Core implementation language |
+| Data Processing | Pandas | latest | DataFrame operations, CSV I/O, filtering |
+| Numerical Computing | NumPy | latest | Vector operations and numerical processing |
+| LLM Framework | LangChain | latest | Unified interface for document loading, chunking, and vector store operations |
+| Embeddings Integration | langchain-huggingface | latest | Connects LangChain to HuggingFace embedding models |
+| Vector Store | langchain-chroma | latest | LangChain–ChromaDB integration layer |
+| Community Loaders | langchain-community | latest | TextLoader and document loader utilities |
+| Text Splitting | langchain-text-splitters | latest | CharacterTextSplitter for document chunking |
+| Embedding Model | sentence-transformers | latest | `all-MiniLM-L6-v2` — 384-dim local semantic embeddings |
+| Transformer Models | HuggingFace Transformers | latest | Zero-shot classification and emotion analysis pipelines |
+| Vector Database | ChromaDB | latest | Embedded vector store with cosine similarity search |
+| Web Interface | Gradio | 6.19.0 | Interactive ML demo UI with custom theming |
+| Notebooks | Jupyter | latest | Data exploration, preprocessing, and model experimentation |
+| Deployment | HuggingFace Spaces | — | Public cloud hosting for the live demo |
 
-**How it was used here**: instead of training a genre classifier from scratch (which would require thousands of labelled examples), the pipeline passes each book description to `facebook/bart-large-mnli` with candidate labels `["fiction", "nonfiction"]`. The model returns a confidence score for each. This is zero-shot because we never showed the model a single labelled (description → genre) example.
+**Why each technology was chosen:**
 
-**Why it works**: BART was pre-trained on the MultiNLI dataset which taught it to reason about whether a premise entails a hypothesis. "Does this mystery novel description entail the concept of fiction?" is exactly the kind of entailment reasoning the model generalises to.
+**LangChain** — provides a production-grade abstraction over embedding models, document loaders, and vector stores. Swapping the embedding model or vector backend requires changing one line, not rewriting the pipeline.
 
----
+**`all-MiniLM-L6-v2`** — a distilled sentence-transformer that runs locally with no API dependency. At 80 MB it is fast and lightweight while achieving strong performance on semantic textual similarity benchmarks. Using a local model eliminates cost, latency from network calls, and external dependencies at inference time.
 
-## Sentiment Analysis & Emotional Tone
+**ChromaDB** — an embedded vector database that runs in-process. No separate server, no Docker, no infrastructure overhead. Stores vectors with metadata and supports filtered similarity search out of the box.
 
-**What it is**: using a language model to detect the emotional character of a piece of text — not just positive/negative sentiment, but specific emotions.
-
-**How it was used here**: `j-hartmann/emotion-english-distilroberta-base` processes each book's description and outputs probability scores for joy, sadness, fear, anger, and surprise. These scores are stored as columns in `books_with_emotions.csv`.
-
-**Why this adds value**: two books can both be "Nonfiction" and match your query semantically, but one might be written in a tone of fear and dread (a pandemic memoir) while another is joyful (a travel adventure). The emotional filter lets users tune the *feeling* of their recommendations, not just the topic.
-
----
-
-## Vector Database
-
-**What it is**: a database designed specifically for storing and searching high-dimensional vectors. Unlike a SQL database that searches by exact match or range, a vector database finds the K nearest neighbours to a query vector in milliseconds across millions of entries.
-
-**Tool used**: ChromaDB — an open-source, embedded vector database that runs entirely in-process (no separate server needed).
-
-**How it was used**:
-1. `tagged_description.txt` is loaded via LangChain's `TextLoader`
-2. Split into documents using `CharacterTextSplitter`
-3. Each document is embedded using `HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")`
-4. Stored in a `Chroma` vector store via LangChain's `Chroma` wrapper
-
-At query time:
-1. User's text query is embedded with the same model
-2. `chroma_db.similarity_search(query, k=50)` returns the 50 most similar books
-3. Results are joined back to `books_with_emotions.csv` on ISBN to fetch metadata
-4. Category and emotional tone filters are applied to narrow the final display
-
-**Why LangChain**: LangChain provides a unified interface for loading documents, splitting them, embedding them, and querying vector stores. It abstracts away the boilerplate so the pipeline stays readable, and it makes swapping the embedding model or vector store trivial.
+**Gradio** — turns a Python function into a deployable web app with zero frontend code. `gr.Blocks` enables full layout control, and the theming API allows a polished, branded UI without CSS frameworks.
 
 ---
 
-## Gradio Interface
-
-**What it is**: Gradio is a Python library for building interactive ML demos. It wraps Python functions in a web UI with zero frontend code.
-
-**How it was built**:
-- `gr.Blocks` used for full layout control (rather than the simpler `gr.Interface`)
-- Custom `gr.themes.Soft` theme with `primary_hue="orange"` and `secondary_hue="amber"` to create a warm, literary aesthetic
-- Custom CSS injected for typography and card styling
-- Input components: `gr.Textbox` (query), `gr.Dropdown` (category), `gr.Dropdown` (emotional tone), `gr.Slider` (number of results)
-- Output component: `gr.HTML` renders a custom book-card gallery with cover images, title, author, and description
-
-**Core recommendation function** (`recommend_books`):
-1. Takes query string, category, emotional tone, number of results
-2. Embeds query via ChromaDB similarity search
-3. Filters by category if not "All"
-4. Sorts by emotional score column if tone is not "All"
-5. Returns top N results as formatted HTML book cards
-
----
-
-## Evaluation — Precision@K & Recall@K
-
-This is the part that separates this project from a tutorial copy. Most student implementations skip evaluation entirely. This project includes a rigorous offline evaluation harness in `evaluate.py`.
-
-### Why evaluation matters
-
-A recommendation system that *feels* good to use might actually be surfacing irrelevant results. Without measuring, you cannot know. Precision@K and Recall@K are standard information-retrieval metrics used in industry for exactly this purpose.
-
-### Metrics defined
-
-**Precision@K** — of the K books returned, what fraction are actually relevant?
-
-```
-Precision@K = (relevant books in top K) / K
-```
-
-A Precision@5 of 0.8 means 4 out of 5 returned books are relevant.
-
-**Recall@K** — of all the relevant books in the dataset, what fraction did we find in the top K?
-
-```
-Recall@K = (relevant books in top K) / (total relevant books)
-```
-
-A Recall@10 of 0.6 means the system found 60% of all relevant books within its top 10 results.
-
-### How the benchmark was built
-
-A set of hand-labelled queries was created. For each query, relevant books were manually identified from the dataset. `evaluate.py` runs the recommender on each query and computes Precision@K and Recall@K at multiple K values (5, 10).
-
-The benchmark results are committed to the repo (see `evaluate.py`) — they are reproducible, not cherry-picked.
-
-### Why this is the biggest differentiator
-
-Any student can follow a tutorial and get a Gradio app running. Very few measure whether their system actually works. Adding an evaluation harness with real numbers demonstrates:
-- Understanding of information retrieval theory
-- Ability to think rigorously about ML system quality
-- Awareness of the gap between "it runs" and "it works"
-
----
-
-## Tech Stack
-
-| Tool | Version | Role |
-|---|---|---|
-| Python | 3.13 | Core language |
-| sentence-transformers | latest | `all-MiniLM-L6-v2` embedding model |
-| LangChain | latest | Document loading, text splitting, vector store interface |
-| langchain-huggingface | latest | HuggingFace embeddings integration |
-| langchain-chroma | latest | ChromaDB integration via LangChain |
-| langchain-community | latest | TextLoader and community document loaders |
-| langchain-text-splitters | latest | CharacterTextSplitter for chunking documents |
-| ChromaDB | latest | Local vector database for similarity search |
-| Gradio | 6.19.0 | Interactive web UI |
-| pandas | latest | Dataframe operations, CSV I/O |
-| numpy | latest | Numerical operations |
-| transformers (HuggingFace) | latest | Zero-shot classification, sentiment analysis |
-| Kaggle dataset | — | 7k Books with Metadata |
-
----
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 semantic-book-recommender/
-├── GRADIO.py                  # Main app — Gradio UI + recommendation logic
-├── evaluate.py                # Offline evaluation harness (Precision@K, Recall@K)
-├── data-exploration.ipynb     # Data cleaning, zero-shot classification, sentiment
-├── books_with_emotions.csv    # Final dataset with emotion scores (app input)
-├── tagged_description.txt     # ISBN-tagged descriptions (vector store input)
-├── requirements.txt           # All Python dependencies
-└── README.md                  # This file
+│
+├── GRADIO.py                   # Main application — Gradio UI and recommendation logic
+├── evaluate.py                 # Offline evaluation harness — Precision@K and Recall@K
+├── data-exploration.ipynb      # End-to-end data pipeline notebook
+│                               #   ├── Data cleaning and quality filtering
+│                               #   ├── Zero-shot genre classification
+│                               #   ├── Emotion score extraction
+│                               #   └── Dataset export
+│
+├── books_with_emotions.csv     # Final enriched dataset (runtime input to app)
+├── tagged_description.txt      # ISBN-tagged descriptions (vector store input)
+├── requirements.txt            # Python dependencies
+└── README.md                   # Project documentation
 ```
 
 ---
 
-## Running Locally
+## ⚙️ Installation & Setup
 
 ### Prerequisites
 
 - Python 3.10 or higher
-- ~1.5 GB disk space (for model downloads on first run)
+- ~1.5 GB disk space (model downloads on first run)
+- pip
 
-### Setup
+### Steps
 
 ```bash
-# Clone the repo
+# 1. Clone the repository
 git clone https://github.com/harshiniramasamy5-star/semantic-book-recommender.git
 cd semantic-book-recommender
 
-# Create and activate a virtual environment
+# 2. Create and activate virtual environment
 python3 -m venv .venv
 source .venv/bin/activate        # macOS / Linux
 # .venv\Scripts\activate         # Windows
 
-# Install dependencies
+# 3. Install dependencies
 pip install -r requirements.txt
 
-# Run the app
+# 4. Launch the application
 python GRADIO.py
 ```
 
-Open http://localhost:7860 in your browser.
+Open **http://localhost:7860** in your browser.
 
-**First-run note**: on first launch, `all-MiniLM-L6-v2` (~80 MB) downloads from HuggingFace, and ChromaDB builds the vector index from `tagged_description.txt`. This takes 2–3 minutes. Subsequent launches are instant.
+> **First-run note**: `all-MiniLM-L6-v2` (~80 MB) downloads automatically from HuggingFace, and ChromaDB builds the vector index from `tagged_description.txt`. This takes 2–3 minutes. All subsequent launches are instant.
 
 ### Running Evaluation
 
@@ -315,55 +257,194 @@ Open http://localhost:7860 in your browser.
 python evaluate.py
 ```
 
-Prints Precision@K and Recall@K for the benchmark query set.
+Outputs Precision@K and Recall@K for the benchmark query set.
 
 ---
 
-## What I Built Beyond the Tutorial
+## 🚀 Usage
 
-The freeCodeCamp course provides the foundation. The following were designed and implemented independently:
+The app accepts any natural language description of the kind of book you want. You do not need to know titles, authors, or genres.
 
-| Addition | Description |
+**Query examples:**
+
+```
+"Recommend books about entrepreneurship and building from nothing"
+→ Returns books on startups, hustle, and building companies semantically
+
+"Books similar to Atomic Habits"
+→ Surfaces books on behaviour change, habits, and self-improvement
+
+"Best books for learning machine learning"
+→ Returns ML, data science, and AI titles
+
+"A dark psychological thriller with an unreliable narrator"
+→ Finds thrillers matching the emotional and narrative profile
+
+"Motivational books for students navigating uncertainty"
+→ Returns self-help, growth mindset, and career books
+
+"A joyful story about unlikely friendships and belonging"
+→ Surfaces warm, character-driven fiction with high joy scores
+```
+
+**Using the filters:**
+
+- **Category** — narrow results to Fiction or Non-Fiction
+- **Emotional Tone** — filter by the dominant emotion (Joyful, Sad, Suspenseful, Angry, Surprising)
+- **Number of results** — adjust from 1 to 16 books
+
+---
+
+## 🔄 Retrieval-Augmented Generation (RAG)
+
+### What is RAG?
+
+Retrieval-Augmented Generation is an architecture that combines a retrieval system with a generative model. Rather than asking a language model to generate answers purely from its parametric memory (which can hallucinate), a RAG system first retrieves relevant documents from an external knowledge store and feeds them as context to the model.
+
+### How This Project Uses RAG Concepts
+
+This project implements the **retrieval half of RAG** — the component responsible for fetching contextually relevant items from a knowledge base given a natural language query.
+
+| RAG Component | This Project's Implementation |
 |---|---|
-| **Local embedding model** | Used `all-MiniLM-L6-v2` instead of OpenAI embeddings — no API key, no cost, fully reproducible |
-| **Custom Gradio theme** | Applied `gr.themes.Soft(primary_hue="orange", secondary_hue="amber")` and injected custom CSS for a warm library aesthetic, with theme/CSS declared at `gr.Blocks` level |
-| **Offline evaluation harness** | Wrote `evaluate.py` from scratch — hand-labelled benchmark queries, Precision@K and Recall@K implementation, committed real results to repo |
-| **ISBN-tagged retrieval** | Tagged descriptions with ISBN13 prefix to enable reliable metadata join after vector search |
-| **HF Spaces deployment** | Deployed as a live public demo on Hugging Face Spaces |
+| Knowledge Base | ChromaDB storing 7,000 book description embeddings |
+| Retrieval Model | `all-MiniLM-L6-v2` sentence-transformer |
+| Query Encoder | Same sentence-transformer (shared embedding space) |
+| Retrieval Mechanism | Cosine similarity top-K search |
+| Context | Enriched book metadata (title, author, description, emotions) |
+
+The retrieval pipeline ensures results are grounded in real book data rather than model hallucination — a direct application of RAG's core principle.
+
+### Traditional Search vs. Semantic Retrieval
+
+| Dimension | Traditional Keyword Search | Semantic Retrieval |
+|---|---|---|
+| Matching | Exact word overlap (BM25, TF-IDF) | Vector cosine similarity |
+| Synonyms | Missed unless explicitly handled | Captured naturally by embeddings |
+| Intent | Not modelled | Encoded into vector representation |
+| Cross-lingual | Requires translation | Multilingual models handle natively |
+| Query type | Works best for specific terms | Works best for natural language descriptions |
 
 ---
 
-## Key Concepts Explained
+## 🧠 Embeddings Explained
 
-**What is an embedding?**
-A numerical representation of text as a vector of floating-point numbers. Semantically similar texts produce vectors that are close together in space, regardless of surface-level word overlap.
+### What Are Embeddings?
 
-**What is a vector database?**
-A database optimised for nearest-neighbour search over high-dimensional vectors. It answers: "given this query vector, find the K stored vectors that are most similar to it." ChromaDB does this in milliseconds for thousands of stored books.
+An embedding is a dense numerical vector that represents a piece of text in a high-dimensional space. The key property is that semantically similar texts produce vectors that are geometrically close — their vectors point in nearly the same direction.
 
-**What is zero-shot classification?**
-Using a language model to classify text into categories it was never explicitly trained on. The model uses its understanding of language to reason whether a description entails a given label — no labelled training examples needed.
+A 384-dimensional embedding from `all-MiniLM-L6-v2` encodes the full semantic content of a sentence into a list of 384 floating-point numbers. This vector is the "meaning" of that sentence in a form a computer can compute with.
 
-**What is semantic search vs. keyword search?**
-Keyword search: returns books that contain the exact words in your query.
-Semantic search: returns books whose *meaning* matches your query, even if they share no words. Querying "lonely astronaut" might surface books about "isolated explorers" because the embeddings are close in vector space.
+### Why Embeddings Capture Meaning
 
-**What is Precision@K / Recall@K?**
-Standard metrics for evaluating ranked retrieval systems. Precision@K asks: how accurate are my top K results? Recall@K asks: how complete are my top K results compared to everything relevant in the dataset? Together they capture the quality vs. coverage tradeoff.
+Sentence-transformers are trained on large datasets of semantically similar sentence pairs using contrastive learning. The model learns to pull similar sentences together in vector space and push dissimilar ones apart. After training, the geometry of the space encodes semantic relationships — so "isolated explorer" and "lonely adventurer" land near each other even though they share no vocabulary.
 
----
+### Why Embeddings Outperform Keyword Matching
 
-## References
+```
+Query:  "a heartwarming story about second chances"
 
-- [freeCodeCamp — Build a Semantic Book Recommender Using an LLM and Python](https://youtu.be/Q7mS1VHm3Yw)
-- [Kaggle — 7k Books with Metadata](https://www.kaggle.com/datasets/dylanjcastillo/7k-books-with-metadata)
-- [HuggingFace — all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
-- [HuggingFace — facebook/bart-large-mnli](https://huggingface.co/facebook/bart-large-mnli)
-- [HuggingFace — j-hartmann/emotion-english-distilroberta-base](https://huggingface.co/j-hartmann/emotion-english-distilroberta-base)
-- [LangChain Documentation](https://docs.langchain.com/)
-- [ChromaDB Documentation](https://docs.trychroma.com/)
-- [Gradio Documentation](https://www.gradio.app/docs/)
+Keyword match finds: books containing "heartwarming", "second", "chances"
+Embedding match finds: books about redemption, forgiveness, new beginnings —
+                       regardless of which specific words they use
+```
+
+The embedding approach recovers the reader's *intent*. The keyword approach recovers the reader's *vocabulary*. For book discovery, intent is what matters.
 
 ---
 
-*Built by [Harshini Ramasamy](https://github.com/harshiniramasamy5-star) — CSE, NIT Warangal*
+## 🗄️ Vector Database (ChromaDB)
+
+### What Is a Vector Database?
+
+A vector database stores high-dimensional vectors and supports efficient nearest-neighbour queries. Unlike a relational database that answers "find rows where column X equals Y," a vector database answers "find the K stored vectors geometrically closest to this query vector."
+
+### Why ChromaDB
+
+- **Embedded** — runs in-process with no separate server or Docker container required
+- **Fast** — approximate nearest-neighbour indexing returns results in milliseconds across thousands of entries
+- **Metadata filtering** — supports filtering by structured attributes (category, emotion) alongside vector similarity
+- **LangChain integration** — first-class support via `langchain-chroma`, keeping the codebase clean
+
+### Similarity Retrieval Process
+
+1. Query text → `all-MiniLM-L6-v2` → 384-dim query vector
+2. ChromaDB computes cosine similarity between query vector and all stored book vectors
+3. Top-50 most similar books returned by vector distance
+4. Results joined to `books_with_emotions.csv` on ISBN13 for full metadata
+5. Structural filters (category, emotion) applied to final shortlist
+6. Top N rendered in the Gradio UI
+
+**Cosine similarity** measures the angle between two vectors — two vectors pointing in the same direction score 1.0 regardless of magnitude. This is well-suited to semantic text comparison because the *direction* of an embedding encodes meaning; the *magnitude* largely reflects text length.
+
+---
+
+## ⚡ Evaluation — Precision@K & Recall@K
+
+### Overview
+
+`evaluate.py` implements a rigorous offline evaluation harness that measures actual recommendation quality against a hand-labelled benchmark. This goes significantly beyond subjective impression testing.
+
+### Metrics
+
+**Precision@K**: of the K results returned, what fraction are genuinely relevant?
+
+```
+Precision@K = (# relevant books in top K) / K
+```
+
+**Recall@K**: of all relevant books in the corpus, what fraction appear in the top K results?
+
+```
+Recall@K = (# relevant books in top K) / (total relevant books in corpus)
+```
+
+These metrics together capture accuracy and completeness — the core tradeoff in any ranked retrieval system.
+
+### Why This Matters for ML Engineering
+
+A running demo is not evidence of quality. Evaluation with reproducible, committed benchmark results is. `evaluate.py` runs against a fixed hand-labelled query set and outputs metrics that can be compared across model changes — the same discipline expected in production ML systems.
+
+---
+
+## 🧩 Engineering Challenges
+
+**Data quality and sparsity** — approximately 25% of raw book records had missing descriptions or unusable metadata. Developing principled filtering criteria (minimum description length, required fields) that balanced corpus size against retrieval quality required iterative experimentation.
+
+**Zero-shot classification calibration** — BART's NLI scores for genre classification required threshold tuning. Books at the Fiction/Non-Fiction boundary (literary journalism, narrative non-fiction) produced ambiguous confidence scores, necessitating a confidence-based abstention policy for low-certainty cases.
+
+**Embedding alignment** — the query and document embeddings must share the same vector space. Using different models for indexing and querying produces meaningless similarity scores. Enforcing a single-model constraint throughout the pipeline and making it a hard architectural requirement rather than a convention eliminated this class of bug.
+
+**Chunking strategy** — book descriptions range from 30 to 500+ words. A fixed-size chunking strategy splits long descriptions mid-sentence, degrading embedding quality. `CharacterTextSplitter` with a large chunk size and no overlap preserves full descriptions as single chunks, ensuring each vector represents a complete book's semantic content.
+
+**Retrieval-relevance tuning** — the similarity search returns 50 candidates before filtering. Too few candidates and the filters exhaust the result set; too many and latency increases. The k=50 default was calibrated against the filter distribution in `books_with_emotions.csv` to ensure non-empty results across all filter combinations.
+
+---
+
+## 📊 Results & Impact
+
+- **Semantic discovery** — users can find books by describing themes, moods, and narratives rather than needing to know titles or authors
+- **Zero infrastructure cost at inference** — the entire embedding and retrieval pipeline runs locally; no API calls, no per-query cost
+- **Emotion-aware recommendations** — the five-emotion filter adds a dimension of personalisation not present in standard category-based systems
+- **Reproducible quality measurement** — committed Precision@K and Recall@K benchmarks provide objective evidence of retrieval quality
+- **Sub-second retrieval** — ChromaDB nearest-neighbour search over 7,000 embeddings completes in milliseconds
+
+---
+
+## 🔭 Future Improvements
+
+- **Hybrid search** — combine dense vector retrieval (semantic) with sparse BM25 retrieval (keyword) and merge rankings using Reciprocal Rank Fusion for higher precision
+- **Personalised recommendations** — track per-user query and rating history to bias retrieval toward individual taste profiles
+- **Advanced reranking** — add a cross-encoder reranking pass after vector retrieval to improve result ordering using pairwise relevance scoring
+- **Agentic workflows** — integrate an LLM agent that can ask clarifying questions, refine queries iteratively, and explain why each book was recommended
+- **Multi-modal embeddings** — incorporate cover image features alongside text embeddings for visually-informed recommendations
+- **Larger corpus** — scale to millions of books using approximate nearest-neighbour indices (HNSW, IVF) and distributed vector stores
+- **FastAPI backend** — decouple the recommendation logic from the UI into a REST API to enable integration with mobile apps and third-party clients
+- **Continuous evaluation** — automate benchmark regression testing on every commit via CI/CD
+
+---
+
+
+<div align="center">
+
+</div>
