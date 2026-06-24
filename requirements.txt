@@ -1,6 +1,7 @@
-gradio
+gradio==4.44.0
 pandas
 numpy
+torch
 transformers
 sentence-transformers
 chromadb
