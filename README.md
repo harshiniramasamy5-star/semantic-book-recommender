@@ -1,16 +1,3 @@
----
-title: Semantic Book Recommender
-emoji: 📚
-colorFrom: pink
-colorTo: yellow
-sdk: gradio
-sdk_version: 6.19.0
-python_version: '3.13'
-app_file: GRADIO.py
-pinned: false
-license: mit
-short_description: Find books by meaning, mood, and category
----
 
 # 📖 Semantic Book Recommender
 
